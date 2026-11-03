@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ESP111 Business Studies – Exam Preparation</title>
+<style>
+:root{--bg:#f6f6f2;--fg:#1d2330;--card:#fff;--ac:#0b5cab;--ok:#1a7f45;--bad:#c0392b;--bd:#d9dce3}
+@media(prefers-color-scheme:dark){:root{--bg:#14171f;--fg:#e8eaf0;--card:#1e222d;--ac:#6cb0ff;--ok:#4cc17f;--bad:#ff7b6b;--bd:#343a4a}}
+*{box-sizing:border-box}body{margin:0;font:16px/1.55 Georgia,serif;background:var(--bg);color:var(--fg)}
+main{max-width:900px;margin:auto;padding:14px}h1{font-size:1.25rem;margin:.2em 0}h3{margin:1em 0 .3em}
+nav{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+button,select,input,textarea{font:inherit;color:inherit;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:7px 11px}
+button{cursor:pointer}button.on,button.pri{background:var(--ac);color:#fff;border-color:var(--ac)}
+input,textarea{width:100%}textarea{min-height:90px}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px;margin:8px 0}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.m{opacity:.72;font-size:.9rem}.t{font-weight:700}
+.bar{height:8px;background:var(--bd);border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok)}
+#tm{position:sticky;top:0;background:var(--bg);padding:6px 0;font-weight:700;z-index:2}
+.card{cursor:pointer}.card.k{border-color:var(--ok)}.card.r{border-color:var(--bad)}
+details{margin:6px 0}summary{cursor:pointer;font-weight:600}pre{white-space:pre-wrap;font:inherit;margin:4px 0}
+</style></head><body><main>
+<h1>ESP111 Business Studies – Units 1–17</h1><nav id="nav"></nav><div id="v"></div></main>
+<script src="data.js"></script>
+<script>
+const $=s=>document.querySelector(s),sh=a=>[...a].sort(()=>Math.random()-.5),T=D.vocab;
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+let S={};try{S=JSON.parse(localStorage.getItem("esp")||"{}")}catch(e){}
+S.w=S.w||{};S.q=S.q||[];S.x=S.x||[];
+const sv=()=>{try{localStorage.setItem("esp",JSON.stringify(S))}catch(e){}};
+const key=x=>x.u+"|"+x.t;
+const norm=s=>s.toLowerCase().replace(/\(.*?\)/g,"").replace(/[^a-z0-9]/g,"");
+const ck=(a,t)=>{a=norm(a);return a&&[t,t.replace(/\(.*?\)/g,""),(t.match(/\((.*?)\)/)||[])[1]||""].some(x=>norm(x)&&norm(x)==a)};
+const uo=(all=1)=>(all?'<option value="0">All units</option>':"")+[...Array(17)].map((_,i)=>`<option value="${i+1}">Unit ${i+1}</option>`).join("");
+const pool=()=>{const u=+($("#u")||{value:0}).value;return T.filter(x=>!u||x.u==u)};
+const hasDef=x=>!x.d.startsWith("(definition");
+const tabs={dash:"Dashboard",vocab:"Vocabulary",quiz:"Quiz",essay:"Essays",exam:"Mock Exam"};
+$("#nav").innerHTML=Object.entries(tabs).map(([k,v])=>`<button data-k="${k}">${v}</button>`).join("");
+$("#nav").onclick=e=>{if(e.target.dataset.k)go(e.target.dataset.k)};
+function go(k){clearInterval(window.iv);[...$("#nav").children].forEach(b=>b.classList.toggle("on",b.dataset.k==k));({dash,vocab,quiz,essay,exam})[k]()}
+const bar=p=>`<div class="bar"><i style="width:${p}%"></i></div>`;
+function dash(){
+ const k=T.filter(x=>S.w[key(x)]=="k").length,p=Math.round(100*k/T.length);
+ let h=`<div class="c"><div class="t">Overall vocabulary progress: ${k}/${T.length} terms known (${p}%)</div>${bar(p)}</div><div class="g">`;
+ for(let u=1;u<=17;u++){const a=T.filter(x=>x.u==u),b=a.filter(x=>S.w[key(x)]=="k").length,r=a.filter(x=>S.w[key(x)]=="r").length;
+  h+=`<div class="c"><div class="t">Unit ${u}</div><div class="m">${a.length} terms · ${b} known · ${r} to review · ${a.length-b-r} not studied</div>${bar(a.length?Math.round(100*b/a.length):0)}</div>`}
+ const qa=S.q.length?Math.round(100*S.q.reduce((s,x)=>s+x[0],0)/S.q.reduce((s,x)=>s+x[1],0)):0;
+ h+=`</div><div class="c"><div class="t">Quiz accuracy: ${S.q.length?qa+"%":"no quizzes yet"}</div><div class="t" style="margin-top:8px">Mock exam history</div>${S.x.length?S.x.slice(-8).reverse().map(x=>`<div>${x[0]} – Reading ${x[1]}/20, Writing 1 ${x[2]}/20 (Writing 2 & 3 self-marked)</div>`).join(""):'<span class="m">No mock exams yet.</span>'}
+ <button style="margin-top:8px" id="rs">Reset all progress</button></div>`;
+ $("#v").innerHTML=h;$("#rs").onclick=()=>{if(confirm("Delete all progress?")){S={w:{},q:[],x:[]};sv();dash()}}}
+function vocab(){
+ $("#v").innerHTML=`<select id="u">${uo()}</select> <select id="f"><option value="">All</option><option value="n">Not studied</option><option value="r">Need review</option><option value="b">Bookmarked</option></select> <input id="s" placeholder="Search term or definition…" style="width:220px"> <span class="m" id="cnt"></span><div id="gr"></div>`;
+ const draw=()=>{const q=$("#s").value.toLowerCase(),f=$("#f").value;
+  const p=pool().filter(x=>(!q||(x.t+x.d).toLowerCase().includes(q))&&(!f||(f=="n"?!S.w[key(x)]:f=="r"?S.w[key(x)]=="r":S.w[key(x)+"b"])));
+  $("#cnt").textContent=p.length+" terms";
+  $("#gr").innerHTML='<div class="g">'+p.map(x=>`<div class="c card ${S.w[key(x)]||""}" data-k="${esc(key(x))}"><div class="t">${esc(x.t)} <span class="m">U${x.u}${S.w[key(x)+"b"]?" ★":""}</span></div></div>`).join("")+"</div>"};
+ ["u","f"].forEach(i=>$("#"+i).onchange=draw);$("#s").oninput=draw;
+ $("#gr").onclick=e=>{const c=e.target.closest(".card"),b=e.target.dataset.a;
+  if(b){const k=e.target.dataset.k;if(b=="b")S.w[k+"b"]=S.w[k+"b"]?0:1;else S.w[k]=b;sv();return draw()}
+  if(!c)return;const x=T.find(y=>key(y)==c.dataset.k),k=c.dataset.k;
+  if(c.querySelector(".det"))return c.querySelector(".det").remove();
+  c.insertAdjacentHTML("beforeend",`<div class="det"><p>${esc(x.d)}</p>${x.e?`<p><b>Example:</b> ${esc(x.e)}</p>`:""}${x.n?`<p><b>Notes / differences:</b> ${esc(x.n)}</p>`:""}<p class="m">Source: ${esc(x.s)}</p>
+  <button data-a="k" data-k="${esc(k)}">I know this</button> <button data-a="r" data-k="${esc(k)}">Need practice</button> <button data-a="b" data-k="${esc(k)}">★ Bookmark</button></div>`)};
+ draw()}
+function quiz(){
+ $("#v").innerHTML=`<select id="u">${uo()}</select> <select id="md"><option value="t">Type the term (fill in)</option><option value="m">Choose the correct term</option><option value="d">Choose the correct definition</option></select> <select id="sc"><option value="">All terms</option><option value="r">Need review only</option></select> <button class="pri" id="st">Start</button><div id="q"></div>`;
+ $("#st").onclick=()=>{let p=pool().filter(hasDef);if($("#sc").value)p=p.filter(x=>S.w[key(x)]=="r");p=sh(p).slice(0,15);
+  if(p.length<4)return $("#q").innerHTML='<div class="c">Not enough terms for this selection.</div>';
+  let i=0,s=0;const md=$("#md").value;
+  const nx=()=>{if(i>=p.length){S.q.push([s,p.length]);sv();return $("#q").innerHTML=`<div class="c t">Finished: ${s}/${p.length}</div>`}
+   const x=p[i],o=sh([x,...sh(T.filter(y=>y.t!=x.t&&hasDef(y))).slice(0,3)]);
+   let h=`<div class="c"><div class="m">Question ${i+1}/${p.length}</div>`;
+   h+=md=="d"?`<p>Which definition matches <b>${esc(x.t)}</b>?</p>`+o.map(y=>`<button class="o" data-t="${esc(y.t)}" style="display:block;width:100%;margin:4px 0;text-align:left">${esc(y.d.slice(0,230))}</button>`).join(""):`<p>${esc(x.d)}</p>`+(md=="m"?o.map(y=>`<button class="o" data-t="${esc(y.t)}" style="display:block;width:100%;margin:4px 0;text-align:left">${esc(y.t)}</button>`).join(""):`<input id="a" placeholder="Type the business term…"><button class="pri" id="ok" style="margin-top:6px">Check</button>`);
+   $("#q").innerHTML=h+`<div id="r"></div></div>`;
+   const fin=r=>{if(r)s++;else S.w[key(x)]="r";sv();$("#r").innerHTML=`<p class="${r?"ok":"bad"}">${r?"Correct":"Incorrect"} – <b>${esc(x.t)}</b>: ${esc(x.d)}</p>${x.n?`<p class="m">${esc(x.n.slice(0,300))}</p>`:""}<button class="pri" id="nx">Next</button>`;$("#nx").onclick=()=>{i++;nx()}};
+   if(md!="t")$("#q").onclick=e=>{if(e.target.className=="o"&&!$("#nx"))fin(e.target.dataset.t==x.t)};
+   else{$("#ok").onclick=()=>{if(!$("#nx"))fin(ck($("#a").value,x.t))};$("#a").onkeydown=e=>{if(e.key=="Enter")($("#nx")||$("#ok")).click()}}};
+  nx()}}
+function essay(){
+ $("#v").innerHTML=`<select id="u">${uo()}</select><div id="o"></div>`;
+ const draw=()=>{const u=+$("#u").value,E=D.essays.filter(e=>!u||e.u==u),B=pool();
+  $("#o").innerHTML=(u==0?D.essay.map(e=>`<div class="c"><div class="t">Sample exam topic</div><p>${esc(e[0])}</p><p class="m">${esc(e[1])}</p></div>`).join(""):"")
+  +`<h3>Essay prompts from the workbook</h3>`+(E.filter(e=>e.k=="prompt").map(e=>`<div class="c"><span class="m">Unit ${e.u}</span><pre>${esc(e.x)}</pre></div>`).join("")||'<p class="m">No prompts in this selection.</p>')
+  +`<h3>Templates and model paragraphs</h3>`+(E.filter(e=>e.k=="material").map(e=>`<details><summary>Unit ${e.u}: ${esc(e.x.slice(0,70))}…</summary><pre>${esc(e.x)}</pre></details>`).join("")||'<p class="m">None.</p>')
+  +(u?`<h3>Unit ${u} vocabulary bank (${B.length})</h3><div class="c">${B.map(x=>`<b>${esc(x.t)}</b>: ${esc(x.d)}`).join("<br>")}</div>`:"")};
+ $("#u").onchange=draw;draw()}
+// Mock exam – blueprint: Reading T/F/NG 5×4=20; Writing 1 gap-fill 5×4=20; Writing 2 short answers 4×5=20; Writing 3 essay ≥250 words 40; total 100; 75 min
+function exam(){
+ const P=sh(D.tfng)[0],W=sh(T.filter(hasDef)).slice(0,5),Q=sh(D.qa).slice(0,4),E=sh(D.essay)[0];let secs=75*60;
+ const dr=JSON.parse(sessionStorage.getItem("dr")||"{}");
+ $("#v").innerHTML=`<div id="tm"></div><h3>PART 1 – Reading Comprehension (20 points)</h3><p class="m">Decide if each statement is TRUE, FALSE or NOT GIVEN.</p><div class="c">${esc(P.t)}</div>
+ ${P.q.map((q,i)=>`<div class="c">${i+1}. ${esc(q[0])} <select id="p${i}"><option></option><option>T</option><option>F</option><option>NG</option></select></div>`).join("")}
+ <h3>PART 2 – Writing 1 (20 points): fill in the key term</h3>${W.map((x,i)=>`<div class="c">${i+6}. ________ : ${esc(x.d)}<input id="w${i}"></div>`).join("")}
+ <h3>Writing 2 (20 points): answer the questions</h3>${Q.map((q,i)=>`<div class="c">${i+11}. ${esc(q[0])}<textarea id="s${i}"></textarea></div>`).join("")}
+ <h3>Writing 3 (40 points): essay of at least 250 words</h3><div class="c">${esc(E[0])}<textarea id="e" style="min-height:260px"></textarea><span class="m" id="wc">0 words</span></div>
+ <button class="pri" id="sb">Submit and view answers</button><div id="res"></div>`;
+ document.querySelectorAll("#v input,#v textarea,#v select").forEach(el=>{if(dr[el.id])el.value=dr[el.id];el.addEventListener("input",()=>{dr[el.id]=el.value;sessionStorage.setItem("dr",JSON.stringify(dr));if(el.id=="e")$("#wc").textContent=el.value.trim().split(/\s+/).filter(Boolean).length+" words"})});
+ const tick=()=>{$("#tm").textContent=`Time left: ${Math.floor(secs/60)}:${String(secs%60).padStart(2,"0")}`;if(secs--<=0){clearInterval(window.iv);$("#sb").click()}};tick();window.iv=setInterval(tick,1000);
+ $("#sb").onclick=()=>{clearInterval(window.iv);sessionStorage.removeItem("dr");let a=0,b=0;
+  const pr=P.q.map((q,i)=>{const r=$("#p"+i).value==q[1];a+=r;return`<li class="${r?"ok":"bad"}">${i+1}. ${q[1]} – ${esc(q[0])}</li>`}).join("");
+  const wr=W.map((x,i)=>{const r=ck($("#w"+i).value,x.t);b+=r;return`<li class="${r?"ok":"bad"}">${i+6}. ${esc(x.t)}</li>`}).join("");
+  S.x.push([new Date().toLocaleDateString(),a*4,b*4]);sv();
+  $("#res").innerHTML=`<div class="c"><h3>Results (auto-marked sections only)</h3><p class="t">Reading ${a*4}/20 · Writing 1 ${b*4}/20</p><ul>${pr}</ul><ul>${wr}</ul>
+  <h4>Writing 2 model answers (self-mark, 5 points each)</h4><ul>${Q.map((q,i)=>`<li><b>${i+11}.</b> ${esc(q[1])}</li>`).join("")}</ul>
+  <h4>Writing 3 outline (self-mark /40)</h4><p>${esc(E[1])}</p><p class="m">Writing 2 and 3 need human evaluation; they are not auto-graded.</p><button class="pri" onclick="go('exam')">New exam</button></div>`;scrollTo(0,document.body.scrollHeight)}}
+go("dash");
+</script></body></html>
